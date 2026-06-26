@@ -122,6 +122,11 @@ def training(dataset, opt, pipe, testing_iterations, saving_iterations, checkpoi
         if opt.include_mask:  
             if mask_training_state:
                 Ll1 = 0.0
+                # Use rgb loss
+                render_pkg = render(viewpoint_cam, gaussians, pipe, bg, use_trained_exp=dataset.train_test_exp, separate_sh=SPARSE_ADAM_AVAILABLE)
+                image, viewspace_point_tensor, visibility_filter, radii = render_pkg["render"], render_pkg["viewspace_points"], render_pkg["visibility_filter"], render_pkg["radii"]
+                gt_image = viewpoint_cam.original_image.cuda()
+                Ll1 = l1_loss(image, gt_image)
                 # Use mask loss 
                 gt_mask = viewpoint_cam.get_mask(dataset.mask_path)
                 if gt_mask is not None:
